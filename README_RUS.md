@@ -1,0 +1,27 @@
+# Movie Night Bartender 🎬
+
+Telegram бот для выбора фильмов на вечер с умной системой рекомендаций.
+
+## 🌟 Особенности
+
+- Выбор фильмов по жанру, стране и рейтингу
+- Агрегация рейтингов из IMDB, Кинопоиска и Rotten Tomatoes
+- Система рекомендаций на основе оценок пользователей
+- Отслеживание просмотренных фильмов
+- Персонализированные рекомендации
+
+## 🛠 Технологии
+
+- Python 3.10+
+- aiogram 3.x
+- SQLAlchemy (async)
+- SQLite/PostgreSQL
+- Celery + Redis
+- Docker
+
+## 🚀 Установка
+
+1. Клонировать репозиторий:
+```bash
+git clone https://github.com/yourusername/movie-night-bartender.git
+cd movie-night-bartender

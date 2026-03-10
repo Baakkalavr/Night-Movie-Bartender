@@ -1,37 +1,13 @@
-#!/usr/bin/env python
-import asyncio
-import logging
-import sys
-from aiogram import Bot, Dispatcher, F
+from aiogram import Router, F
 from aiogram.filters import Command, CommandStart
 from aiogram.types import Message, ReplyKeyboardMarkup, KeyboardButton
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import State, StatesGroup
-from aiogram.fsm.storage.memory import MemoryStorage
-from aiogram.client.default import DefaultBotProperties
-from aiogram.enums import ParseMode
-import os
-from dotenv import load_dotenv
+import logging
 
 
-load_dotenv()
-
-
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-    stream=sys.stdout
-)
+router = Router()
 logger = logging.getLogger(__name__)
-
-
-bot = Bot(
-    token=os.getenv("BOT_TOKEN"),
-    default=DefaultBotProperties(parse_mode=ParseMode.HTML)
-)
-
-
-dp = Dispatcher(storage=MemoryStorage())
 
 
 class MovieSelection(StatesGroup):
@@ -52,9 +28,9 @@ def get_genres_keyboard():
     return ReplyKeyboardMarkup(keyboard=buttons, resize_keyboard=True)
 
 
-@dp.message(CommandStart())
-@dp.message(Command("start"))
-@dp.message(F.text == "/start")
+@router.message(CommandStart())
+@router.message(Command("start"))
+@router.message(F.text == "/start")
 async def cmd_start(message: Message, state: FSMContext):
     """Обработчик команды /start"""
     logger.info(f"🔥 START сработал! User: {message.from_user.id}")
@@ -77,8 +53,8 @@ async def cmd_start(message: Message, state: FSMContext):
     await message.answer(welcome_text, parse_mode="HTML")
 
 
-@dp.message(Command("select"))
-@dp.message(F.text == "/select")
+@router.message(Command("select"))
+@router.message(F.text == "/select")
 async def cmd_select(message: Message, state: FSMContext):
     """Начало выбора фильма"""
     logger.info(f"🎬 SELECT сработал! User: {message.from_user.id}")
@@ -90,7 +66,7 @@ async def cmd_select(message: Message, state: FSMContext):
     )
 
 
-@dp.message(MovieSelection.choosing_genre)
+@router.message(MovieSelection.choosing_genre)
 async def process_genre(message: Message, state: FSMContext):
     """Обработка выбора жанра"""
     genre = message.text
@@ -131,7 +107,7 @@ async def process_genre(message: Message, state: FSMContext):
     )
 
 
-@dp.message(MovieSelection.choosing_country)
+@router.message(MovieSelection.choosing_country)
 async def process_country(message: Message, state: FSMContext):
     """Обработка выбора страны"""
     country = message.text
@@ -165,7 +141,7 @@ async def process_country(message: Message, state: FSMContext):
     )
 
 
-@dp.message(MovieSelection.choosing_rating)
+@router.message(MovieSelection.choosing_rating)
 async def process_rating(message: Message, state: FSMContext):
     """Обработка выбора рейтинга"""
     rating_text = message.text
@@ -217,74 +193,3 @@ async def process_rating(message: Message, state: FSMContext):
         "🎬 Пока это демо-версия. В следующем обновлении здесь будет реальный поиск фильмов!\n\n"
         "А пока можешь попробовать выбрать другие параметры: /select"
     )
-
-
-@dp.message(Command("help"))
-async def cmd_help(message: Message):
-    """Обработчик команды /help"""
-    logger.info(f"📨 help от {message.from_user.id}")
-    await message.answer(
-        "📋 Доступные команды:\n"
-        "/start - Начать\n"
-        "/select - Выбрать фильм\n"
-        "/help - Помощь\n"
-        "/cancel - Отмена"
-    )
-
-
-@dp.message(Command("cancel"))
-async def cmd_cancel(message: Message, state: FSMContext):
-    """Отмена текущего действия"""
-    logger.info(f"📨 cancel от {message.from_user.id}")
-    current_state = await state.get_state()
-    if current_state is None:
-        await message.answer("❌ Нет активного действия")
-        return
-    
-    await state.clear()
-    await message.answer("❌ Действие отменено")
-
-
-@dp.message()
-async def echo_all(message: Message):
-    """Обработчик всех остальных сообщений"""
-    logger.info(f"❌ Неизвестная команда: '{message.text}' от {message.from_user.id}")
-    await message.answer(
-        "❌ Я понимаю только команды.\n"
-        "Используй /help для списка команд."
-    )
-
-async def main():
-    """Главная функция запуска бота"""
-    logger.info("=" * 50)
-    logger.info("🚀 ЗАПУСК MOVIE NIGHT BARTENDER")
-    logger.info("=" * 50)
-    
-    try:
-        
-        token = os.getenv("BOT_TOKEN")
-        if not token:
-            logger.error("❌ BOT_TOKEN не найден в .env файле!")
-            return
-        
-       
-        me = await bot.get_me()
-        logger.info(f"✅ Бот @{me.username} запущен")
-        
-        logger.info("=" * 50)
-        logger.info("🤖 Бот готов к работе!")
-        logger.info("📝 Команды: /start, /select, /help, /cancel")
-        logger.info("=" * 50)
-        
-        await dp.start_polling(bot, skip_updates=True)
-        
-    except Exception as e:
-        logger.error(f"❌ Ошибка: {e}", exc_info=True)
-    finally:
-        await bot.session.close()
-
-if __name__ == "__main__":
-    try:
-        asyncio.run(main())
-    except KeyboardInterrupt:
-        logger.info("👋 Бот остановлен пользователем")
