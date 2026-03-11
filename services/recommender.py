@@ -129,7 +129,7 @@ class MovieRecommender:
         
 
         selected_movie = random.choice(available_movies)
-        logger.info(f"✅ Выбран фильм: {selected_movie.title} (жанр: {selected_movie.genre})")
+        logger.info(f"Выбран фильм: {selected_movie.title} (жанр: {selected_movie.genre})")
         logger.info("=" * 60)
         
         return selected_movie

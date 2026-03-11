@@ -14,10 +14,10 @@ db_path = os.path.join(db_dir, 'movies.db')
 
 try:
     os.makedirs(db_dir, exist_ok=True)
-    logger.info(f"📁 Папка для БД: {db_dir}")
-    logger.info(f"📄 Файл БД: {db_path}")
+    logger.info(f"Папка для БД: {db_dir}")
+    logger.info(f"Файл БД: {db_path}")
 except Exception as e:
-    logger.error(f"❌ Ошибка создания папки: {e}")
+    logger.error(f"Ошибка создания папки: {e}")
 
 DATABASE_URL = f'sqlite:///{db_path}'
 logger.info(f"🔗 URL БД: {DATABASE_URL}")
@@ -42,15 +42,15 @@ def init_db():
     try:
 
         Base.metadata.create_all(bind=engine)
-        logger.info("✅ Команда create_all выполнена")
+        logger.info("Команда create_all выполнена")
         
 
         inspector = inspect(engine)
         tables = inspector.get_table_names()
-        logger.info(f"📊 Таблицы в БД после создания: {tables}")
+        logger.info(f"Таблицы в БД после создания: {tables}")
         
         if not tables:
-            logger.error("❌ Таблицы не создались!")
+            logger.error("Таблицы не создались!")
             
 
             logger.info("Пробуем создать таблицы через сырой SQL...")
@@ -114,15 +114,15 @@ def init_db():
                 conn.commit()
 
             tables = inspector.get_table_names()
-            logger.info(f"📊 Таблицы после ручного создания: {tables}")
+            logger.info(f"Таблицы после ручного создания: {tables}")
         else:
-            logger.info(f"✅ Таблицы созданы успешно: {tables}")
+            logger.info(f"Таблицы созданы успешно: {tables}")
             
 
             for table in tables:
                 columns = inspector.get_columns(table)
-                logger.info(f"  📋 {table}: {[col['name'] for col in columns]}")
+                logger.info(f" {table}: {[col['name'] for col in columns]}")
                 
     except Exception as e:
-        logger.error(f"❌ Ошибка при создании таблиц: {e}")
+        logger.error(f"Ошибка при создании таблиц: {e}")
         raise

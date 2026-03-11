@@ -58,24 +58,24 @@ class MovieLoader:
             logger.info(f"[{i}/{limit}] Обработка: {movie_title}")
             
             try:
-                # Ищем фильм
+                
                 results = await parser.search_movies(movie_title)
                 if not results:
-                    logger.warning(f"❌ Не найден: {movie_title}")
+                    logger.warning(f"Не найден: {movie_title}")
                     failed += 1
                     continue
                 
-                # Берем первый результат
+                
                 search_result = results[0]
                 
-                # Получаем детали
+                
                 details = await parser.get_movie_details(search_result.source_id)
                 if not details:
-                    logger.warning(f"❌ Нет деталей для: {movie_title}")
+                    logger.warning(f"Нет деталей для: {movie_title}")
                     failed += 1
                     continue
                 
-                # Создаем объект для сохранения
+               
                 parsed_movie = ParsedMovie(
                     title=details.title,
                     title_original=details.title_original,
@@ -90,44 +90,44 @@ class MovieLoader:
                     avg_rating=details.imdb_rating if details.imdb_rating else 0.0
                 )
                 
-                # Сохраняем в БД
+                
                 if await self.save_movie(parsed_movie):
                     loaded += 1
-                    logger.info(f"✅ [{i}/{limit}] Добавлен: {details.title}")
+                    logger.info(f"[{i}/{limit}] Добавлен: {details.title}")
                 else:
                     failed += 1
                 
-                # Задержка между запросами
+                
                 await asyncio.sleep(2)
                 
             except Exception as e:
-                logger.error(f"❌ Ошибка при обработке {movie_title}: {e}")
+                logger.error(f"Ошибка при обработке {movie_title}: {e}")
                 failed += 1
                 continue
         
         logger.info("=" * 50)
-        logger.info(f"📊 ИТОГИ ЗАГРУЗКИ:")
-        logger.info(f"✅ Успешно загружено: {loaded}")
-        logger.info(f"❌ Не удалось загрузить: {failed}")
+        logger.info(f"ИТОГИ ЗАГРУЗКИ:")
+        logger.info(f"Успешно загружено: {loaded}")
+        logger.info(f"Не удалось загрузить: {failed}")
         logger.info("=" * 50)
     
     async def save_movie(self, movie_data: ParsedMovie) -> bool:
         """Сохранение фильма в БД"""
         db = SessionLocal()
         try:
-            # Проверяем, есть ли уже такой фильм
+            
             existing = db.query(Movie).filter(
                 Movie.title_original == movie_data.title_original
             ).first()
             
             if existing:
-                # Обновляем существующий фильм
+                
                 for key, value in movie_data.dict().items():
                     if value is not None and hasattr(existing, key):
                         setattr(existing, key, value)
                 logger.info(f"🔄 Обновлен фильм: {movie_data.title}")
             else:
-                # Создаем новый фильм
+                
                 movie = Movie(
                     title=movie_data.title,
                     title_original=movie_data.title_original,
@@ -148,7 +148,7 @@ class MovieLoader:
             return True
             
         except Exception as e:
-            logger.error(f"❌ Ошибка сохранения в БД: {e}")
+            logger.error(f"Ошибка сохранения в БД: {e}")
             db.rollback()
             return False
         finally:

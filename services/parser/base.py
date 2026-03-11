@@ -59,7 +59,7 @@ class BaseParser(ABC):
                         logger.warning(f"HTTP 202 - страница еще обрабатывается, ждем...")
                         await asyncio.sleep(2)
                         continue
-                    elif response.status == 429:  # Too Many Requests
+                    elif response.status == 429:  
                         wait_time = 2 ** attempt
                         logger.warning(f"Rate limited. Waiting {wait_time}s...")
                         await asyncio.sleep(wait_time)

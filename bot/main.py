@@ -38,11 +38,11 @@ from services.recommender import MovieRecommender
 
 
 try:
-    logger.info("🔄 Инициализация базы данных...")
+    logger.info("Инициализация базы данных...")
     init_db()
-    logger.info("✅ База данных инициализирована")
+    logger.info("База данных инициализирована")
 except Exception as e:
-    logger.error(f"❌ Ошибка инициализации БД: {e}")
+    logger.error(f"Ошибка инициализации БД: {e}")
     sys.exit(1)
 
 
@@ -63,13 +63,13 @@ class MovieSelection(StatesGroup):
 
 
 GENRES_WITH_EMOJI = [
-    "🎭 Комедия", "🎬 Боевик", "🎪 Драма", "👻 Ужасы",
-    "🚀 Фантастика", "🔪 Триллер", "💕 Мелодрама", "🕵️ Детектив",
-    "⚔️ Приключения", "🧙‍♂️ Фэнтези", "🤖 Киберпанк", "🎵 Мюзикл"
+    "Комедия", "Боевик", "Драма", "Ужасы",
+    "Фантастика", "Триллер", "Мелодрама", "Детектив",
+    "Приключения", "Фэнтези", "Киберпанк", "Мюзикл"
 ]
 
 
-GENRES = [g.split(" ", 1)[1] for g in GENRES_WITH_EMOJI]
+GENRES = [g for g in GENRES_WITH_EMOJI]
 
 
 async def get_or_create_user(telegram_id: int, username: str = None, first_name: str = None):
@@ -86,7 +86,7 @@ async def get_or_create_user(telegram_id: int, username: str = None, first_name:
             db.add(user)
             db.commit()
             db.refresh(user)
-            logger.info(f"👤 Новый пользователь: {telegram_id}")
+            logger.info(f"Новый пользователь: {telegram_id}")
         return user
     finally:
         db.close()
@@ -94,10 +94,10 @@ async def get_or_create_user(telegram_id: int, username: str = None, first_name:
 
 @dp.message(CommandStart())
 @dp.message(Command("start"))
-@dp.message(F.text.in_(["🎬 Начать", "/start"]))
+@dp.message(F.text.in_(["Начать", "/start"]))
 async def cmd_start(message: Message, state: FSMContext):
     """Обработчик команды /start"""
-    logger.info(f"🔥 START: User {message.from_user.id}")
+    logger.info(f"START: User {message.from_user.id}")
     
 
     await get_or_create_user(
@@ -109,20 +109,20 @@ async def cmd_start(message: Message, state: FSMContext):
     await state.clear()
     
     welcome_text = """
-🎬 <b>Добро пожаловать в Movie Night Bartender!</b>
+<b>Добро пожаловать в Movie Night Bartender!</b>
 
 Я помогу тебе выбрать идеальный фильм на вечер. 
 
 <b>Как это работает:</b>
-1️⃣ Выбираешь жанр
-2️⃣ Указываешь минимальный рейтинг
-3️⃣ Получаешь рекомендацию!
+1. Выбираешь жанр
+2. Указываешь минимальный рейтинг
+3. Получаешь рекомендацию!
 
 <b>Используй кнопки ниже для навигации:</b>
-• 🎯 <b>Выбрать фильм</b> - начать подбор
-• 📊 <b>Моя статистика</b> - просмотренные фильмы и оценки
-• 🏆 <b>Топ фильмов</b> - лучшие фильмы по версии пользователей
-• ❓ <b>Помощь</b> - список команд
+• <b>Выбрать фильм</b> - начать подбор
+• <b>Моя статистика</b> - просмотренные фильмы и оценки
+• <b>Топ фильмов</b> - лучшие фильмы по версии пользователей
+• <b>Помощь</b> - список команд
     """
     
     await message.answer(
@@ -133,14 +133,14 @@ async def cmd_start(message: Message, state: FSMContext):
 
 
 @dp.message(Command("select"))
-@dp.message(F.text.in_(["🎯 Выбрать фильм", "/select"]))
+@dp.message(F.text.in_(["Выбрать фильм", "/select"]))
 async def cmd_select(message: Message, state: FSMContext):
     """Начало выбора фильма"""
-    logger.info(f"🎬 SELECT: User {message.from_user.id}")
+    logger.info(f"SELECT: User {message.from_user.id}")
     
     await state.set_state(MovieSelection.choosing_genre)
     await message.answer(
-        "🎭 <b>Выбери жанр фильма:</b>\n"
+        "<b>Выбери жанр фильма:</b>\n"
         "Используй кнопки ниже 👇",
         parse_mode="HTML",
         reply_markup=get_genres_keyboard()
@@ -152,19 +152,16 @@ async def process_genre(message: Message, state: FSMContext):
     """Обработка выбора жанра"""
     genre_text = message.text
     
-    if genre_text == "❌ Отмена":
+    if genre_text == "Отмена":
         await state.clear()
         await message.answer(
-            "❌ Выбор отменен. Используй кнопки меню:",
+            "Выбор отменен. Используй кнопки меню:",
             reply_markup=get_main_keyboard()
         )
         return
     
 
-    if " " in genre_text:
-        genre = genre_text.split(" ", 1)[1]
-    else:
-        genre = genre_text
+    genre = genre_text
     
 
     if genre not in GENRES:
@@ -175,12 +172,12 @@ async def process_genre(message: Message, state: FSMContext):
         return
     
     await state.update_data(genre=genre)
-    logger.info(f"🎭 User {message.from_user.id} выбрал жанр: {genre}")
+    logger.info(f"User {message.from_user.id} выбрал жанр: {genre}")
     
     await state.set_state(MovieSelection.choosing_rating)
     await message.answer(
-        f"✅ Выбран жанр: {genre_text}\n\n"
-        f"⭐ <b>Укажи минимальный рейтинг:</b>",
+        f"Выбран жанр: {genre_text}\n\n"
+        f"<b>Укажи минимальный рейтинг:</b>",
         parse_mode="HTML",
         reply_markup=get_rating_keyboard()
     )
@@ -191,15 +188,15 @@ async def process_rating(message: Message, state: FSMContext):
     """Обработка выбора рейтинга"""
     rating_text = message.text
     
-    if rating_text == "❌ Отмена":
+    if rating_text == "Отмена":
         await state.clear()
         await message.answer(
-            "❌ Выбор отменен. Используй кнопки меню:",
+            "Выбор отменен. Используй кнопки меню:",
             reply_markup=get_main_keyboard()
         )
         return
     
-    if rating_text == "⭐ Любой":
+    if rating_text == "Любой":
         min_rating = 0.0
     else:
         try:
@@ -208,7 +205,7 @@ async def process_rating(message: Message, state: FSMContext):
                 raise ValueError
         except ValueError:
             await message.answer(
-                "❌ Пожалуйста, выбери значение из кнопок 👇",
+                "Пожалуйста, выбери значение из кнопок 👇",
                 reply_markup=get_rating_keyboard()
             )
             return
@@ -216,19 +213,21 @@ async def process_rating(message: Message, state: FSMContext):
     await state.update_data(min_rating=min_rating)
     data = await state.get_data()
     
-    logger.info(f"⭐ User {message.from_user.id} выбрал рейтинг: {min_rating}")
+    logger.info(f"User {message.from_user.id} выбрал рейтинг: {min_rating}")
     
     await message.answer(
-        f"✅ <b>Выбор завершен!</b>\n\n"
+        f"<b>Выбор завершен!</b>\n\n"
         f"• Жанр: {data['genre']}\n"
         f"• Мин. рейтинг: {min_rating if min_rating > 0 else 'Любой'}\n\n"
-        f"🔍 <i>Ищу подходящий фильм...</i>",
+        f"<i>Ищу подходящий фильм...</i>",
         parse_mode="HTML",
         reply_markup=get_main_keyboard()
     )
     
 
     await show_recommendation(message, state)
+
+
 async def show_recommendation(message: Message, state: FSMContext):
     """Показать рекомендацию фильма"""
     data = await state.get_data()
@@ -247,7 +246,7 @@ async def show_recommendation(message: Message, state: FSMContext):
         
         if not movie:
             await message.answer(
-                "😕 <b>К сожалению, не нашлось фильмов по твоим критериям.</b>\n\n"
+                "<b>К сожалению, не нашлось фильмов по твоим критериям.</b>\n\n"
                 "Попробуй изменить параметры: /select",
                 parse_mode="HTML",
                 reply_markup=get_main_keyboard()
@@ -260,14 +259,14 @@ async def show_recommendation(message: Message, state: FSMContext):
         await state.set_state(MovieSelection.showing_movie)
         
 
-        rating_text = f"⭐ <b>Рейтинг IMDb:</b> {movie.imdb_rating:.1f}/10\n"
+        rating_text = f"<b>Рейтинг IMDb:</b> {movie.imdb_rating:.1f}/10\n"
         
         movie_text = f"""
-🎬 <b>{movie.title}</b> ({movie.year})
-🎭 <b>Жанр:</b> {movie.genre}
-🎪 <b>Режиссер:</b> {movie.director or 'Неизвестен'}
+<b>{movie.title}</b> ({movie.year})
+<b>Жанр:</b> {movie.genre}
+<b>Режиссер:</b> {movie.director or 'Неизвестен'}
 {rating_text}
-📝 <b>Описание:</b>
+<b>Описание:</b>
 <i>{movie.description or 'Описание отсутствует'}</i>
         """
         
@@ -306,7 +305,7 @@ async def process_movie_action(callback: CallbackQuery, state: FSMContext):
     
     if not movie_id:
         await callback.message.edit_text(
-            "❌ Что-то пошло не так. Начни заново: /select",
+            "Что-то пошло не так. Начни заново: /select",
             reply_markup=None
         )
         await state.clear()
@@ -321,26 +320,26 @@ async def process_movie_action(callback: CallbackQuery, state: FSMContext):
             try:
                 if callback.message.photo:
                     await callback.message.edit_caption(
-                        caption=callback.message.caption + "\n\n✅ <b>Отличный выбор! Приятного просмотра!</b>",
+                        caption=callback.message.caption + "\n\n<b>Отличный выбор! Приятного просмотра!</b>",
                         parse_mode="HTML",
                         reply_markup=None
                     )
                 else:
                     await callback.message.edit_text(
-                        callback.message.text + "\n\n✅ <b>Отличный выбор! Приятного просмотра!</b>",
+                        callback.message.text + "\n\n<b>Отличный выбор! Приятного просмотра!</b>",
                         parse_mode="HTML",
                         reply_markup=None
                     )
             except:
 
                 await callback.message.answer(
-                    "✅ <b>Отличный выбор! Приятного просмотра!</b>",
+                    "<b>Отличный выбор! Приятного просмотра!</b>",
                     parse_mode="HTML"
                 )
             
             await state.set_state(MovieSelection.waiting_for_rating)
             await callback.message.answer(
-                "🍿 <b>После просмотра не забудь оценить фильм!</b>\n"
+                "<b>После просмотра не забудь оценить фильм!</b>\n"
                 "Просто нажми кнопку ниже 👇",
                 parse_mode="HTML",
                 reply_markup=get_rating_numbers_keyboard()
@@ -352,18 +351,18 @@ async def process_movie_action(callback: CallbackQuery, state: FSMContext):
             try:
                 if callback.message.photo:
                     await callback.message.edit_caption(
-                        caption=callback.message.caption + "\n\n🔄 <i>Ищу другой фильм...</i>",
+                        caption=callback.message.caption + "\n\n<i>Ищу другой фильм...</i>",
                         parse_mode="HTML",
                         reply_markup=None
                     )
                 else:
                     await callback.message.edit_text(
-                        callback.message.text + "\n\n🔄 <i>Ищу другой фильм...</i>",
+                        callback.message.text + "\n\n<i>Ищу другой фильм...</i>",
                         parse_mode="HTML",
                         reply_markup=None
                     )
             except:
-                await callback.message.answer("🔄 <i>Ищу другой фильм...</i>", parse_mode="HTML")
+                await callback.message.answer("<i>Ищу другой фильм...</i>", parse_mode="HTML")
             
             await show_recommendation(callback.message, state)
             
@@ -373,18 +372,18 @@ async def process_movie_action(callback: CallbackQuery, state: FSMContext):
             try:
                 if callback.message.photo:
                     await callback.message.edit_caption(
-                        caption=callback.message.caption + "\n\n❌ <i>Фильм отклонен. Ищу другой...</i>",
+                        caption=callback.message.caption + "\n\n<i>Фильм отклонен. Ищу другой...</i>",
                         parse_mode="HTML",
                         reply_markup=None
                     )
                 else:
                     await callback.message.edit_text(
-                        callback.message.text + "\n\n❌ <i>Фильм отклонен. Ищу другой...</i>",
+                        callback.message.text + "\n\n<i>Фильм отклонен. Ищу другой...</i>",
                         parse_mode="HTML",
                         reply_markup=None
                     )
             except:
-                await callback.message.answer("❌ <i>Фильм отклонен. Ищу другой...</i>", parse_mode="HTML")
+                await callback.message.answer("<i>Фильм отклонен. Ищу другой...</i>", parse_mode="HTML")
             
             await show_recommendation(callback.message, state)
             
@@ -409,8 +408,8 @@ async def process_rating(callback: CallbackQuery, state: FSMContext):
         recommender.rate_movie(user_id, movie_id, rating)
         
         await callback.message.edit_text(
-            f"✅ <b>Спасибо за оценку {rating}/10!</b>\n\n"
-            f"Хочешь посмотреть еще фильмы? Используй кнопку '🎯 Выбрать фильм'",
+            f"<b>Спасибо за оценку {rating}/10!</b>\n\n"
+            f"Хочешь посмотреть еще фильмы? Используй кнопку 'Выбрать фильм'",
             parse_mode="HTML",
             reply_markup=get_main_keyboard()
         )
@@ -420,12 +419,13 @@ async def process_rating(callback: CallbackQuery, state: FSMContext):
     
     await callback.answer()
 
+
 @dp.callback_query(lambda c: c.data == 'skip_rating')
 async def skip_rating(callback: CallbackQuery, state: FSMContext):
     """Пропустить оценку"""
     await callback.message.edit_text(
-        "👋 <b>Хорошего дня!</b>\n\n"
-        "Если захочешь еще фильмов - нажми '🎯 Выбрать фильм'",
+        "<b>Хорошего дня!</b>\n\n"
+        "Если захочешь еще фильмов - нажми 'Выбрать фильм'",
         parse_mode="HTML",
         reply_markup=get_main_keyboard()
     )
@@ -433,7 +433,7 @@ async def skip_rating(callback: CallbackQuery, state: FSMContext):
     await callback.answer()
 
 
-@dp.message(F.text == "📊 Моя статистика")
+@dp.message(F.text == "Моя статистика")
 async def cmd_stats(message: Message, state: FSMContext):
     """Статистика пользователя"""
     user_id = message.from_user.id
@@ -443,7 +443,7 @@ async def cmd_stats(message: Message, state: FSMContext):
         user = db.query(User).filter_by(telegram_id=user_id).first()
         if not user:
             await message.answer(
-                "❌ Ты еще не начал пользоваться ботом. Нажми /start",
+                "Ты еще не начал пользоваться ботом. Нажми /start",
                 reply_markup=get_main_keyboard()
             )
             return
@@ -475,16 +475,16 @@ async def cmd_stats(message: Message, state: FSMContext):
         available = recommender.get_available_count(user_id)
         
         stats_text = f"""
-📊 <b>Твоя статистика:</b>
+<b>Твоя статистика:</b>
 
-👤 <b>Пользователь:</b> {message.from_user.first_name or 'Аноним'}
-🎬 <b>Просмотрено:</b> {watched_count}
-⏭️ <b>Пропущено:</b> {skipped_count}
-⭐ <b>Оценок:</b> {ratings_count}
-📈 <b>Средняя оценка:</b> {avg_rating:.1f}/10
+<b>Пользователь:</b> {message.from_user.first_name or 'Аноним'}
+<b>Просмотрено:</b> {watched_count}
+<b>Пропущено:</b> {skipped_count}
+<b>Оценок:</b> {ratings_count}
+<b>Средняя оценка:</b> {avg_rating:.1f}/10
 
-📚 <b>Всего фильмов в базе:</b> {total_movies}
-🎯 <b>Доступно для тебя:</b> {available}
+<b>Всего фильмов в базе:</b> {total_movies}
+<b>Доступно для тебя:</b> {available}
         """
         
         await message.answer(stats_text, parse_mode="HTML", reply_markup=get_main_keyboard())
@@ -493,7 +493,7 @@ async def cmd_stats(message: Message, state: FSMContext):
         db.close()
 
 
-@dp.message(F.text == "🏆 Топ фильмов")
+@dp.message(F.text == "Топ фильмов")
 async def cmd_top(message: Message, state: FSMContext):
     """Топ фильмов"""
     db = SessionLocal()
@@ -503,12 +503,12 @@ async def cmd_top(message: Message, state: FSMContext):
             Movie.imdb_rating.isnot(None)
         ).order_by(Movie.imdb_rating.desc()).limit(10).all()
         
-        text = "🏆 <b>Топ 10 фильмов по версии IMDb</b>\n\n"
+        text = "<b>Топ 10 фильмов по версии IMDb</b>\n\n"
         
         for i, movie in enumerate(top_movies, 1):
             text += f"{i}. {movie.title} ({movie.year}) — {movie.imdb_rating}/10\n"
         
-        text += "\n👥 <b>Топ по версии пользователей</b> скоро появится!"
+        text += "\n<b>Топ по версии пользователей</b> скоро появится!"
         
         await message.answer(text, parse_mode="HTML", reply_markup=get_main_keyboard())
         
@@ -516,7 +516,7 @@ async def cmd_top(message: Message, state: FSMContext):
         db.close()
 
 
-@dp.message(F.text == "📜 Моя история")
+@dp.message(F.text == "Моя история")
 async def cmd_history(message: Message):
     """Показать историю просмотренных фильмов"""
     user_id = message.from_user.id
@@ -525,17 +525,17 @@ async def cmd_history(message: Message):
     try:
         user = db.query(User).filter_by(telegram_id=user_id).first()
         if not user:
-            await message.answer("❌ Сначала начни пользоваться ботом: /start")
+            await message.answer("Сначала начни пользоваться ботом: /start")
             return
         
         recommender = MovieRecommender(db)
         watched = recommender.get_watched_movies(user.id)
         
         if not watched:
-            await message.answer("📭 Ты еще не посмотрел ни одного фильма!")
+            await message.answer("Ты еще не посмотрел ни одного фильма!")
             return
         
-        text = "📜 <b>Твоя история просмотров:</b>\n\n"
+        text = "<b>Твоя история просмотров:</b>\n\n"
         for i, movie in enumerate(watched, 1):
             text += f"{i}. {movie.title} ({movie.year}) - {movie.imdb_rating}/10\n"
         
@@ -545,25 +545,25 @@ async def cmd_history(message: Message):
         db.close()
 
 
-@dp.message(F.text == "❓ Помощь")
+@dp.message(F.text == "Помощь")
 @dp.message(Command("help"))
 async def cmd_help(message: Message):
     """Помощь"""
     help_text = """
-📋 <b>Доступные команды:</b>
+<b>Доступные команды:</b>
 
-🎬 <b>/start</b> - Начать работу
-🎯 <b>/select</b> - Выбрать фильм
-📊 <b>Моя статистика</b> - твои просмотры и оценки
-🏆 <b>Топ фильмов</b> - лучшие фильмы
-❌ <b>/cancel</b> - отменить текущее действие
-❓ <b>/help</b> - показать эту справку
+<b>/start</b> - Начать работу
+<b>/select</b> - Выбрать фильм
+<b>Моя статистика</b> - твои просмотры и оценки
+<b>Топ фильмов</b> - лучшие фильмы
+<b>/cancel</b> - отменить текущее действие
+<b>/help</b> - показать эту справку
 
 <b>Как пользоваться:</b>
-1️⃣ Нажми "🎯 Выбрать фильм"
-2️⃣ Выбери жанр из списка
-3️⃣ Укажи минимальный рейтинг
-4️⃣ Получи рекомендацию!
+1. Нажми "Выбрать фильм"
+2. Выбери жанр из списка
+3. Укажи минимальный рейтинг
+4. Получи рекомендацию!
 
 <b>После просмотра:</b>
 Оцени фильм от 1 до 10 - это поможет другим пользователям!
@@ -573,21 +573,21 @@ async def cmd_help(message: Message):
 
 
 @dp.message(Command("cancel"))
-@dp.message(F.text == "❌ Отмена")
+@dp.message(F.text == "Отмена")
 async def cmd_cancel(message: Message, state: FSMContext):
     """Отмена текущего действия"""
-    logger.info(f"📨 cancel от {message.from_user.id}")
+    logger.info(f"cancel от {message.from_user.id}")
     current_state = await state.get_state()
     if current_state is None:
         await message.answer(
-            "❌ Нет активного действия",
+            "Нет активного действия",
             reply_markup=get_main_keyboard()
         )
         return
     
     await state.clear()
     await message.answer(
-        "❌ Действие отменено. Используй кнопки меню:",
+        "Действие отменено. Используй кнопки меню:",
         reply_markup=get_main_keyboard()
     )
 
@@ -595,44 +595,46 @@ async def cmd_cancel(message: Message, state: FSMContext):
 @dp.message()
 async def echo_all(message: Message):
     """Обработчик всех остальных сообщений"""
-    logger.info(f"❌ Неизвестная команда: '{message.text}' от {message.from_user.id}")
+    logger.info(f"Неизвестная команда: '{message.text}' от {message.from_user.id}")
     await message.answer(
-        "❌ Я понимаю только команды из меню.\n"
+        "Я понимаю только команды из меню.\n"
         "Используй кнопки ниже 👇",
         reply_markup=get_main_keyboard()
     )
 
+
 async def main():
     """Главная функция запуска бота"""
     logger.info("=" * 50)
-    logger.info("🚀 ЗАПУСК MOVIE NIGHT BARTENDER")
+    logger.info("ЗАПУСК MOVIE NIGHT BARTENDER")
     logger.info("=" * 50)
     
     try:
 
         token = os.getenv("BOT_TOKEN")
         if not token:
-            logger.error("❌ BOT_TOKEN не найден в .env файле!")
+            logger.error("BOT_TOKEN не найден в .env файле!")
             return
         
 
         me = await bot.get_me()
-        logger.info(f"✅ Бот @{me.username} запущен")
+        logger.info(f"Бот @{me.username} запущен")
         
         logger.info("=" * 50)
-        logger.info("🤖 Бот готов к работе!")
-        logger.info("📝 Команды: /start, /select, /help, /cancel")
+        logger.info("Бот готов к работе!")
+        logger.info("Команды: /start, /select, /help, /cancel")
         logger.info("=" * 50)
         
         await dp.start_polling(bot, skip_updates=True)
         
     except Exception as e:
-        logger.error(f"❌ Ошибка: {e}", exc_info=True)
+        logger.error(f"Ошибка: {e}", exc_info=True)
     finally:
         await bot.session.close()
+
 
 if __name__ == "__main__":
     try:
         asyncio.run(main())
     except KeyboardInterrupt:
-        logger.info("👋 Бот остановлен пользователем")
+        logger.info("Бот остановлен пользователем")

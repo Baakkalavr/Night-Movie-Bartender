@@ -26,9 +26,9 @@ async def main():
     if args.search:
         result = await loader.search_and_load(args.search)
         if result:
-            logger.info(f"✅ Фильм загружен: {result['title']}")
+            logger.info(f"Фильм загружен: {result['title']}")
         else:
-            logger.error(f"❌ Не удалось загрузить фильм: {args.search}")
+            logger.error(f"Не удалось загрузить фильм: {args.search}")
     
     if args.update_ratings:
         await loader.update_all_ratings()

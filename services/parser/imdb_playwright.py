@@ -196,7 +196,7 @@ class IMDBPlaywrightParser:
                  
                     poster_url = json_ld.get('image')
                     
-                    logger.info(f"✅ Получены данные (JSON-LD): {title} ({year})")
+                    logger.info(f"Получены данные (JSON-LD): {title} ({year})")
                     
                     await browser.close()
                     
@@ -243,7 +243,7 @@ class IMDBPlaywrightParser:
                     if year_match:
                         year = int(year_match.group(1))
                     
-                    logger.info(f"✅ Получены данные (HTML): {title}")
+                    logger.info(f"Получены данные (HTML): {title}")
                     
                     await browser.close()
                     
@@ -262,6 +262,6 @@ class IMDBPlaywrightParser:
                     )
                 
             except Exception as e:
-                logger.error(f"❌ Ошибка получения деталей для {movie_id}: {e}")
+                logger.error(f"Ошибка получения деталей для {movie_id}: {e}")
                 await browser.close()
                 return None

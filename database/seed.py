@@ -103,7 +103,7 @@ def seed_movies():
 
         inspector = inspect(db.bind)
         if 'movies' not in inspector.get_table_names():
-            logger.error("❌ Таблица movies не существует!")
+            logger.error("Таблица movies не существует!")
             return
         
 
@@ -119,10 +119,10 @@ def seed_movies():
         db.bulk_save_objects(movies)
         db.commit()
         
-        logger.info(f"✅ Добавлено {len(SAMPLE_MOVIES)} тестовых фильмов")
+        logger.info(f"Добавлено {len(SAMPLE_MOVIES)} тестовых фильмов")
         
     except Exception as e:
-        logger.error(f"❌ Ошибка при заполнении БД: {e}")
+        logger.error(f"Ошибка при заполнении БД: {e}")
         db.rollback()
     finally:
         db.close()
