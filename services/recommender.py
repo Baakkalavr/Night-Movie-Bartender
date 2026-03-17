@@ -7,16 +7,11 @@ from database.models import Movie, User, UserRating, UserViewed
 
 logger = logging.getLogger(__name__)
 
-class MovieRecommender:
-    """Рекомендательный движок"""
-    
+class MovieRecommender:   
     def __init__(self, db: Session):
         self.db = db
     
     def get_recommendation(self, user_id: int, genre: str = None, min_rating: float = 0):
-        """
-        Получить рекомендацию фильма для пользователя
-        """
         logger.info("=" * 60)
         logger.info(f"🔍 ПОИСК ФИЛЬМА: user_id={user_id}, genre={genre}, min_rating={min_rating}")
         
@@ -135,9 +130,6 @@ class MovieRecommender:
         return selected_movie
     
     def mark_as_viewed(self, user_id: int, movie_id: int, status: str = 'skipped'):
-        """
-        Отметить фильм как просмотренный/пропущенный (с защитой от дубликатов)
-        """
         try:
 
             existing = self.db.query(UserViewed).filter_by(
@@ -165,9 +157,6 @@ class MovieRecommender:
             self.db.rollback()
     
     def rate_movie(self, user_id: int, movie_id: int, rating: int):
-        """
-        Оценить фильм
-        """
         try:
             existing = self.db.query(UserRating).filter_by(
                 user_id=user_id, movie_id=movie_id
@@ -192,9 +181,6 @@ class MovieRecommender:
             self.db.rollback()
     
     def get_watched_movies(self, user_id: int, limit: int = 10):
-        """
-        Получить историю просмотренных фильмов пользователя
-        """
         try:
             watched = self.db.query(Movie).join(
                 UserViewed, Movie.id == UserViewed.movie_id
@@ -211,9 +197,6 @@ class MovieRecommender:
             return []
     
     def get_available_count(self, user_id: int, genre: str = None):
-        """
-        Получить количество доступных фильмов для пользователя
-        """
         viewed_subquery = self.db.query(UserViewed.movie_id).filter(
             UserViewed.user_id == user_id
         ).subquery()

@@ -11,7 +11,6 @@ from .models import ParsedMovie
 logger = logging.getLogger(__name__)
 
 class MovieLoader:
-    """Загрузчик фильмов из различных источников"""
     
     POPULAR_MOVIES = [
         "The Shawshank Redemption",
@@ -47,7 +46,6 @@ class MovieLoader:
     ]
     
     async def load_popular_movies(self, limit: int = 30):
-        """Загрузка популярных фильмов"""
         logger.info(f"🚀 Начинаем загрузку {limit} популярных фильмов...")
         
         parser = IMDBPlaywrightParser()
@@ -112,7 +110,6 @@ class MovieLoader:
         logger.info("=" * 50)
     
     async def save_movie(self, movie_data: ParsedMovie) -> bool:
-        """Сохранение фильма в БД"""
         db = SessionLocal()
         try:
             

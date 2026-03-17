@@ -7,9 +7,7 @@ import logging
 
 logger = logging.getLogger(__name__)
 
-class BaseParser(ABC):
-    """Базовый класс для всех парсеров"""
-    
+class BaseParser(ABC):    
     def __init__(self):
         self.session: Optional[aiohttp.ClientSession] = None
         self.default_headers = {
@@ -32,16 +30,13 @@ class BaseParser(ABC):
     
     @abstractmethod
     async def search_movies(self, query: str) -> List:
-        """Поиск фильмов по названию"""
         pass
     
     @abstractmethod
     async def get_movie_details(self, source_id: str) -> Optional[Any]:
-        """Получение детальной информации о фильме"""
         pass
     
     async def fetch_html(self, url: str, custom_headers: Dict = None) -> Optional[str]:
-        """Получение HTML страницы с повторными попытками"""
         max_retries = 3
         headers = custom_headers or self.default_headers
         
@@ -78,5 +73,4 @@ class BaseParser(ABC):
         return None
     
     def parse_html(self, html: str) -> BeautifulSoup:
-        """Парсинг HTML в BeautifulSoup объект"""
         return BeautifulSoup(html, 'lxml')

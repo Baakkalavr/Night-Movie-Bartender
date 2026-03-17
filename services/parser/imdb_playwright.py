@@ -10,9 +10,7 @@ from .models import MovieSearchResult, MovieDetails
 
 logger = logging.getLogger(__name__)
 
-class IMDBPlaywrightParser:
-    """Парсер IMDb с использованием Playwright (эмуляция браузера)"""
-    
+class IMDBPlaywrightParser:    
     BASE_URL = "https://www.imdb.com"
     SEARCH_URL = f"{BASE_URL}/find?q={{query}}&s=tt"
     
@@ -107,7 +105,6 @@ class IMDBPlaywrightParser:
                 return []
     
     async def get_movie_details(self, movie_id: str) -> Optional[MovieDetails]:
-        """Получение детальной информации о фильме через браузер"""
         url = f"https://www.imdb.com/title/{movie_id}/"
         logger.info(f"🔍 Получение деталей: {url}")
         

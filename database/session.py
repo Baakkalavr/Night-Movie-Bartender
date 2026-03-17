@@ -31,8 +31,6 @@ SessionLocal = sessionmaker(bind=engine)
 Base = declarative_base()
 
 def init_db():
-    """Инициализация БД - создание всех таблиц"""
-
     from database.models import User, Movie, UserRating, UserViewed
     
     logger.info("=" * 50)

@@ -73,7 +73,6 @@ GENRES = [g for g in GENRES_WITH_EMOJI]
 
 
 async def get_or_create_user(telegram_id: int, username: str = None, first_name: str = None):
-    """Получить или создать пользователя в БД"""
     db = SessionLocal()
     try:
         user = db.query(User).filter_by(telegram_id=telegram_id).first()
@@ -96,7 +95,6 @@ async def get_or_create_user(telegram_id: int, username: str = None, first_name:
 @dp.message(Command("start"))
 @dp.message(F.text.in_(["Начать", "/start"]))
 async def cmd_start(message: Message, state: FSMContext):
-    """Обработчик команды /start"""
     logger.info(f"START: User {message.from_user.id}")
     
 
@@ -149,7 +147,6 @@ async def cmd_select(message: Message, state: FSMContext):
 
 @dp.message(MovieSelection.choosing_genre)
 async def process_genre(message: Message, state: FSMContext):
-    """Обработка выбора жанра"""
     genre_text = message.text
     
     if genre_text == "Отмена":
@@ -185,7 +182,6 @@ async def process_genre(message: Message, state: FSMContext):
 
 @dp.message(MovieSelection.choosing_rating)
 async def process_rating(message: Message, state: FSMContext):
-    """Обработка выбора рейтинга"""
     rating_text = message.text
     
     if rating_text == "Отмена":
@@ -229,7 +225,6 @@ async def process_rating(message: Message, state: FSMContext):
 
 
 async def show_recommendation(message: Message, state: FSMContext):
-    """Показать рекомендацию фильма"""
     data = await state.get_data()
     user_id = message.from_user.id
     
@@ -296,7 +291,6 @@ async def show_recommendation(message: Message, state: FSMContext):
 
 @dp.callback_query(lambda c: c.data in ['watch', 'next', 'reject'])
 async def process_movie_action(callback: CallbackQuery, state: FSMContext):
-    """Обработка действий с фильмом"""
     action = callback.data
     user_id = callback.from_user.id
     
@@ -395,7 +389,6 @@ async def process_movie_action(callback: CallbackQuery, state: FSMContext):
 
 @dp.callback_query(lambda c: c.data.startswith('rate_'))
 async def process_rating(callback: CallbackQuery, state: FSMContext):
-    """Обработка оценки фильма"""
     rating = int(callback.data.split('_')[1])
     user_id = callback.from_user.id
     
@@ -422,7 +415,6 @@ async def process_rating(callback: CallbackQuery, state: FSMContext):
 
 @dp.callback_query(lambda c: c.data == 'skip_rating')
 async def skip_rating(callback: CallbackQuery, state: FSMContext):
-    """Пропустить оценку"""
     await callback.message.edit_text(
         "<b>Хорошего дня!</b>\n\n"
         "Если захочешь еще фильмов - нажми 'Выбрать фильм'",
@@ -435,7 +427,6 @@ async def skip_rating(callback: CallbackQuery, state: FSMContext):
 
 @dp.message(F.text == "Моя статистика")
 async def cmd_stats(message: Message, state: FSMContext):
-    """Статистика пользователя"""
     user_id = message.from_user.id
     
     db = SessionLocal()
@@ -495,7 +486,6 @@ async def cmd_stats(message: Message, state: FSMContext):
 
 @dp.message(F.text == "Топ фильмов")
 async def cmd_top(message: Message, state: FSMContext):
-    """Топ фильмов"""
     db = SessionLocal()
     try:
 
@@ -518,7 +508,6 @@ async def cmd_top(message: Message, state: FSMContext):
 
 @dp.message(F.text == "Моя история")
 async def cmd_history(message: Message):
-    """Показать историю просмотренных фильмов"""
     user_id = message.from_user.id
     
     db = SessionLocal()
@@ -548,7 +537,6 @@ async def cmd_history(message: Message):
 @dp.message(F.text == "Помощь")
 @dp.message(Command("help"))
 async def cmd_help(message: Message):
-    """Помощь"""
     help_text = """
 <b>Доступные команды:</b>
 
@@ -575,7 +563,6 @@ async def cmd_help(message: Message):
 @dp.message(Command("cancel"))
 @dp.message(F.text == "Отмена")
 async def cmd_cancel(message: Message, state: FSMContext):
-    """Отмена текущего действия"""
     logger.info(f"cancel от {message.from_user.id}")
     current_state = await state.get_state()
     if current_state is None:
@@ -594,7 +581,6 @@ async def cmd_cancel(message: Message, state: FSMContext):
 
 @dp.message()
 async def echo_all(message: Message):
-    """Обработчик всех остальных сообщений"""
     logger.info(f"Неизвестная команда: '{message.text}' от {message.from_user.id}")
     await message.answer(
         "Я понимаю только команды из меню.\n"
@@ -604,7 +590,6 @@ async def echo_all(message: Message):
 
 
 async def main():
-    """Главная функция запуска бота"""
     logger.info("=" * 50)
     logger.info("ЗАПУСК MOVIE NIGHT BARTENDER")
     logger.info("=" * 50)

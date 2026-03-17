@@ -3,7 +3,6 @@ from typing import Optional, List
 from datetime import datetime
 
 class MovieSearchResult(BaseModel):
-    """Результат поиска фильма"""
     source: str  
     source_id: str  
     title: str
@@ -13,7 +12,6 @@ class MovieSearchResult(BaseModel):
     poster_url: Optional[str] = None
 
 class MovieDetails(BaseModel):
-    """Детальная информация о фильме"""
     title: str
     title_original: str
     year: Optional[int] = None
@@ -35,7 +33,6 @@ class MovieDetails(BaseModel):
     writers: List[str] = Field(default_factory=list)
     
 class ParsedMovie(BaseModel):
-    """Полный объект фильма для сохранения в БД"""
     title: str
     title_original: str
     year: Optional[int] = None
@@ -53,7 +50,6 @@ class ParsedMovie(BaseModel):
     avg_rating: Optional[float] = None
     
     def calculate_avg_rating(self) -> float:
-        """Вычисляет средний рейтинг из доступных источников"""
         ratings = []
         if self.imdb_rating:
             ratings.append(self.imdb_rating)

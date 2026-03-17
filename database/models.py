@@ -4,7 +4,6 @@ from sqlalchemy.orm import relationship
 from database.session import Base
 
 class User(Base):
-    """Модель пользователя Telegram"""
     __tablename__ = 'users'
     
     id = Column(Integer, primary_key=True)
@@ -18,7 +17,6 @@ class User(Base):
     viewed = relationship("UserViewed", back_populates="user", cascade="all, delete-orphan")
 
 class Movie(Base):
-    """Модель фильма"""
     __tablename__ = 'movies'
     
     id = Column(Integer, primary_key=True)
@@ -44,12 +42,10 @@ class Movie(Base):
         Index('idx_movie_genre_country_rating', 'genre', 'country', 'avg_rating'),
     )
     
-    # Связи
     ratings = relationship("UserRating", back_populates="movie", cascade="all, delete-orphan")
     viewed = relationship("UserViewed", back_populates="movie", cascade="all, delete-orphan")
 
 class UserRating(Base):
-    """Оценки пользователей"""
     __tablename__ = 'user_ratings'
     
     id = Column(Integer, primary_key=True)
@@ -67,7 +63,6 @@ class UserRating(Base):
     movie = relationship("Movie", back_populates="ratings")
 
 class UserViewed(Base):
-    """Просмотренные/отклоненные фильмы"""
     __tablename__ = 'user_viewed'
     
     id = Column(Integer, primary_key=True)
